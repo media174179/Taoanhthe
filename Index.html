@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chuyển đổi ảnh thường sang ảnh thẻ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #09f;
+            animation: spin 1s ease infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .custom-radio input:checked + .radio-label {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .custom-radio input:checked + .radio-label .radio-dot {
+            background-color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-6 md:p-10">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Chuyển đổi ảnh thường sang ảnh thẻ</h1>
+                <p class="text-gray-600 mt-2">Tải lên ảnh chân dung của bạn và AI sẽ tạo ra ảnh thẻ chuyên nghiệp chỉ trong vài giây.</p>
+                <a href="https://www.tiktok.com/@hocveai.com" target="_blank" class="text-blue-500 hover:underline mt-2 inline-block">Bởi [Học Về AI]</a>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                <!-- Cột điều khiển -->
+                <div class="flex flex-col space-y-6">
+                    <div>
+                        <h2 class="text-lg font-semibold mb-3">1. Tải ảnh của bạn lên</h2>
+                        <div id="image-upload-area" class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-blue-500 transition-colors">
+                            <input type="file" id="image-uploader" class="hidden" accept="image/png, image/jpeg">
+                            <div id="upload-prompt">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4V12a4 4 0 014-4h12l4-4h12a4 4 0 014 4v4m-8-4l-4 4m0 0l-4-4m4 4v12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                <p class="mt-2 text-sm text-gray-600">
+                                    <span class="font-semibold text-blue-600">Nhấn để tải ảnh lên</span> hoặc kéo thả
+                                </p>
+                                <p class="text-xs text-gray-500 mt-1">PNG, JPG (tối đa 5MB)</p>
+                            </div>
+                            <img id="image-preview" src="" class="hidden max-h-48 mx-auto rounded-lg" alt="Xem trước ảnh tải lên" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <h2 class="text-lg font-semibold mb-3">2. Chọn trang phục</h2>
+                        <div class="space-y-3" id="clothing-selector">
+                             <label class="custom-radio flex items-center p-3 border rounded-lg cursor-pointer transition-all">
+                                <input type="radio" name="clothing" value="original" class="hidden" checked>
+                                <div class="radio-label w-full flex items-center">
+                                    <span class="w-4 h-4 inline-block mr-3 border border-gray-300 rounded-full flex-shrink-0 flex items-center justify-center">
+                                        <span class="radio-dot w-2 h-2 block rounded-full"></span>
+                                    </span>
+                                    <span class="text-sm font-medium">Giữ nguyên trang phục</span>
+                                </div>
+                            </label>
+                            <label class="custom-radio flex items-center p-3 border rounded-lg cursor-pointer transition-all">
+                                <input type="radio" name="clothing" value="a business suit" class="hidden">
+                                <div class="radio-label w-full flex items-center">
+                                    <span class="w-4 h-4 inline-block mr-3 border border-gray-300 rounded-full flex-shrink-0 flex items-center justify-center">
+                                         <span class="radio-dot w-2 h-2 block rounded-full"></span>
+                                    </span>
+                                    <span class="text-sm font-medium">Áo vest</span>
+                                </div>
+                            </label>
+                            <label class="custom-radio flex items-center p-3 border rounded-lg cursor-pointer transition-all">
+                                <input type="radio" name="clothing" value="Shirts with collars that match your face shape" class="hidden">
+                                <div class="radio-label w-full flex items-center">
+                                    <span class="w-4 h-4 inline-block mr-3 border border-gray-300 rounded-full flex-shrink-0 flex items-center justify-center">
+                                         <span class="radio-dot w-2 h-2 block rounded-full"></span>
+                                    </span>
+                                    <span class="text-sm font-medium">Sơ mi cổ phù hợp khuôn mặt</span>
+                                </div>
+                            </label>
+                            
+                            <!-- Tùy chọn trang phục tự tải lên -->
+                            <div class="block">
+                                <label class="custom-radio flex items-center p-3 border rounded-lg cursor-pointer transition-all">
+                                    <input type="radio" name="clothing" value="custom" class="hidden">
+                                    <div class="radio-label w-full flex items-center">
+                                        <span class="w-4 h-4 inline-block mr-3 border border-gray-300 rounded-full flex-shrink-0 flex items-center justify-center">
+                                             <span class="radio-dot w-2 h-2 block rounded-full"></span>
+                                        </span>
+                                        <span class="text-sm font-medium">Tự chọn (Tải ảnh trang phục)</span>
+                                    </div>
+                                </label>
+                                <!-- Khu vực upload trang phục ẩn -->
+                                <div id="custom-clothing-upload" class="hidden mt-2 ml-2 pl-4 border-l-2 border-gray-200">
+                                    <div id="clothing-upload-area" class="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center cursor-pointer hover:border-blue-500 transition-colors bg-gray-50">
+                                        <input type="file" id="clothing-uploader" class="hidden" accept="image/png, image/jpeg">
+                                        <p class="text-xs text-gray-600" id="clothing-upload-text">Nhấn để tải ảnh trang phục mẫu</p>
+                                        <img id="clothing-preview" src="" class="hidden max-h-32 mx-auto rounded mt-2 shadow-sm" alt="Preview trang phục">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mục 3: Chọn kiểu tóc -->
+                    <div>
+                        <h2 class="text-lg font-semibold mb-3">3. Chọn kiểu tóc</h2>
+                        <div class="space-y-3" id="hair-selector">
+                             <label class="custom-radio flex items-center p-3 border rounded-lg cursor-pointer transition-all">
+                                <input type="radio" name="hair" value="original" class="hidden" checked>
+                                <div class="radio-label w-full flex items-center">
+                                    <span class="w-4 h-4 inline-block mr-3 border border-gray-300 rounded-full flex-shrink-0 flex items-center justify-center">
+                                        <span class="radio-dot w-2 h-2 block rounded-full"></span>
+                                    </span>
+                                    <span class="text-sm font-medium">Giữ nguyên tóc</span>
+                                </div>
+                            </label>
+                            
+                            <!-- Tùy chọn tóc tự tải lên -->
+                            <div class="block">
+                                <label class="custom-radio flex items-center p-3 border rounded-lg cursor-pointer transition-all">
+                                    <input type="radio" name="hair" value="custom" class="hidden">
+                                    <div class="radio-label w-full flex items-center">
+                                        <span class="w-4 h-4 inline-block mr-3 border border-gray-300 rounded-full flex-shrink-0 flex items-center justify-center">
+                                             <span class="radio-dot w-2 h-2 block rounded-full"></span>
+                                        </span>
+                                        <span class="text-sm font-medium">Tự chọn (Tải ảnh mẫu tóc)</span>
+                                    </div>
+                                </label>
+                                <!-- Khu vực upload tóc ẩn -->
+                                <div id="custom-hair-upload" class="hidden mt-2 ml-2 pl-4 border-l-2 border-gray-200">
+                                    <div id="hair-upload-area" class="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center cursor-pointer hover:border-blue-500 transition-colors bg-gray-50">
+                                        <input type="file" id="hair-uploader" class="hidden" accept="image/png, image/jpeg">
+                                        <p class="text-xs text-gray-600" id="hair-upload-text">Nhấn để tải ảnh mẫu tóc</p>
+                                        <img id="hair-preview" src="" class="hidden max-h-32 mx-auto rounded mt-2 shadow-sm" alt="Preview tóc">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="generate-button" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-all shadow-md disabled:bg-gray-400 disabled:cursor-not-allowed">
+                        Tạo ảnh thẻ
+                    </button>
+                </div>
+                
+                <!-- Cột kết quả -->
+                <div class="flex flex-col space-y-6">
+                    <h2 class="text-lg font-semibold text-center md:text-left">4. Xem trước và Tải về</h2>
+                    <div id="results-area" class="hidden">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Ảnh nền trắng -->
+                            <div class="text-center">
+                                <div class="bg-gray-200 rounded-lg overflow-hidden aspect-[3/4] flex items-center justify-center">
+                                     <img id="result-white" src="" class="w-full h-full object-cover" alt="Ảnh thẻ nền trắng">
+                                </div>
+                                <a id="download-white" href="#" download="anh-the-nen-trang.png" class="mt-3 inline-block w-full bg-gray-800 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-900 transition-all text-sm text-center">
+                                    Tải về Nền Trắng
+                                </a>
+                            </div>
+                            <!-- Ảnh nền xanh -->
+                            <div class="text-center">
+                                <div class="bg-gray-200 rounded-lg overflow-hidden aspect-[3/4] flex items-center justify-center">
+                                     <img id="result-blue" src="" class="w-full h-full object-cover" alt="Ảnh thẻ nền xanh">
+                                </div>
+                                <a id="download-blue" href="#" download="anh-the-nen-xanh.png" class="mt-3 inline-block w-full bg-gray-800 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-900 transition-all text-sm text-center">
+                                    Tải về Nền Xanh
+                                </a>
+                            </div>
+                        </div>
+                         <button id="regenerate-button" class="w-full mt-4 bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-all shadow-md">
+                            Tạo lại
+                        </button>
+                    </div>
+
+                    <div id="placeholder-area" class="text-center text-gray-500 p-8 border-2 border-dashed rounded-lg h-full flex flex-col justify-center items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 text-gray-300" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5c-4.25.1-7.5-2.25-7.5-5.5s3-5.5 7.5-5.5c4.15 0 7.5 2.25 7.5 5.5 0 2.25-1.5 4-4.5 5"/><path d="M12 4.5c-4.25-.1-7.5 2.25-7.5 5.5s3 5.5 7.5 5.5c4.15 0 7.5-2.25 7.5-5.5 0-2.25-1.5-4-4.5-5"/><path d="M12 4.5V1c-4.25.1-7.5 2.25-7.5 5.5S7.75 12 12 12s7.5-2.25 7.5-5.5S16.25 1.1 12 1v3.5"/><path d="M12 20.5V23c4.25-.1 7.5-2.25 7.5-5.5S16.25 12 12 12s-7.5 2.25-7.5 5.5c0 2.25 1.5 4 4.5 5v-2.5"/></svg>
+                        <p class="mt-4">Ảnh thẻ của bạn sẽ xuất hiện ở đây.</p>
+                    </div>
+                     <div id="loading-area" class="hidden text-center p-8 flex flex-col justify-center items-center">
+                        <div class="spinner"></div>
+                        <p class="mt-4 text-gray-600">AI đang xử lý, vui lòng chờ trong giây lát...</p>
+                    </div>
+                    <div id="error-area" class="hidden text-center p-4 bg-red-100 text-red-700 rounded-lg">
+                        <p id="error-message"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const imageUploader = document.getElementById('image-uploader');
+        const imageUploadArea = document.getElementById('image-upload-area');
+        const uploadPrompt = document.getElementById('upload-prompt');
+        const imagePreview = document.getElementById('image-preview');
+        
+        // Selectors
+        const clothingSelector = document.getElementById('clothing-selector');
+        const hairSelector = document.getElementById('hair-selector');
+        
+        // Custom clothing elements
+        const customClothingUpload = document.getElementById('custom-clothing-upload');
+        const clothingUploadArea = document.getElementById('clothing-upload-area');
+        const clothingUploader = document.getElementById('clothing-uploader');
+        const clothingPreview = document.getElementById('clothing-preview');
+        const clothingUploadText = document.getElementById('clothing-upload-text');
+
+        // Custom hair elements
+        const customHairUpload = document.getElementById('custom-hair-upload');
+        const hairUploadArea = document.getElementById('hair-upload-area');
+        const hairUploader = document.getElementById('hair-uploader');
+        const hairPreview = document.getElementById('hair-preview');
+        const hairUploadText = document.getElementById('hair-upload-text');
+
+        const generateButton = document.getElementById('generate-button');
+        const regenerateButton = document.getElementById('regenerate-button');
+        
+        const resultsArea = document.getElementById('results-area');
+        const placeholderArea = document.getElementById('placeholder-area');
+        const loadingArea = document.getElementById('loading-area');
+        const errorArea = document.getElementById('error-area');
+        const errorMessage = document.getElementById('error-message');
+
+        const resultWhiteImg = document.getElementById('result-white');
+        const resultBlueImg = document.getElementById('result-blue');
+        const downloadWhiteLink = document.getElementById('download-white');
+        const downloadBlueLink = document.getElementById('download-blue');
+
+        let originalImageBase64 = null;
+        let clothingImageBase64 = null;
+        let hairImageBase64 = null;
+        
+        // --- API Configuration ---
+        const API_KEY = ""; // Dynamic key attached at runtime
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${API_KEY}`;
+        
+        // --- Event Listeners ---
+        
+        // Main Image Upload
+        imageUploadArea.addEventListener('click', () => imageUploader.click());
+        imageUploadArea.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            imageUploadArea.classList.add('border-blue-500', 'bg-blue-50');
+        });
+        imageUploadArea.addEventListener('dragleave', () => {
+            imageUploadArea.classList.remove('border-blue-500', 'bg-blue-50');
+        });
+        imageUploadArea.addEventListener('drop', (event) => {
+            event.preventDefault();
+            imageUploadArea.classList.remove('border-blue-500', 'bg-blue-50');
+            const files = event.dataTransfer.files;
+            if (files.length) handleFile(files[0], 'main');
+        });
+        imageUploader.addEventListener('change', (event) => {
+            if (event.target.files && event.target.files[0]) handleFile(event.target.files[0], 'main');
+        });
+
+        // Custom Clothing Upload
+        clothingUploadArea.addEventListener('click', () => clothingUploader.click());
+        clothingUploader.addEventListener('change', (event) => {
+            if (event.target.files && event.target.files[0]) handleFile(event.target.files[0], 'clothing');
+        });
+
+        // Custom Hair Upload
+        hairUploadArea.addEventListener('click', () => hairUploader.click());
+        hairUploader.addEventListener('change', (event) => {
+            if (event.target.files && event.target.files[0]) handleFile(event.target.files[0], 'hair');
+        });
+
+        // Radio Button Change Listeners
+        clothingSelector.addEventListener('change', (event) => {
+            if (event.target.name === 'clothing') {
+                if (event.target.value === 'custom') {
+                    customClothingUpload.classList.remove('hidden');
+                } else {
+                    customClothingUpload.classList.add('hidden');
+                }
+            }
+        });
+
+        hairSelector.addEventListener('change', (event) => {
+            if (event.target.name === 'hair') {
+                if (event.target.value === 'custom') {
+                    customHairUpload.classList.remove('hidden');
+                } else {
+                    customHairUpload.classList.add('hidden');
+                }
+            }
+        });
+        
+        generateButton.addEventListener('click', processImage);
+        regenerateButton.addEventListener('click', processImage);
+
+        // --- Core Functions ---
+
+        function handleFile(file, type) {
+            if (!file.type.startsWith('image/')) {
+                showError('Vui lòng chỉ chọn tệp hình ảnh.');
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                 showError('Kích thước ảnh không được vượt quá 5MB.');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64 = reader.result.split(',')[1];
+                if (type === 'main') {
+                    originalImageBase64 = base64;
+                    imagePreview.src = reader.result;
+                    imagePreview.classList.remove('hidden');
+                    uploadPrompt.classList.add('hidden');
+                    generateButton.disabled = false;
+                } else if (type === 'clothing') {
+                    clothingImageBase64 = base64;
+                    clothingPreview.src = reader.result;
+                    clothingPreview.classList.remove('hidden');
+                    clothingUploadText.classList.add('hidden');
+                } else if (type === 'hair') {
+                    hairImageBase64 = base64;
+                    hairPreview.src = reader.result;
+                    hairPreview.classList.remove('hidden');
+                    hairUploadText.classList.add('hidden');
+                }
+                hideError();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function processImage() {
+            if (!originalImageBase64) {
+                showError("Vui lòng tải ảnh lên trước.");
+                return;
+            }
+
+            const selectedClothing = document.querySelector('input[name="clothing"]:checked').value;
+            const selectedHair = document.querySelector('input[name="hair"]:checked').value;
+            
+            // Validation
+            if (selectedClothing === 'custom' && !clothingImageBase64) {
+                showError("Vui lòng tải lên ảnh trang phục bạn muốn sử dụng.");
+                return;
+            }
+            if (selectedHair === 'custom' && !hairImageBase64) {
+                showError("Vui lòng tải lên ảnh kiểu tóc bạn muốn sử dụng.");
+                return;
+            }
+
+            setLoading(true);
+            hideError();
+
+            let clothingPrompt = "";
+            let hairPrompt = "";
+            let imageIndex = 2; // Start from 2 because 1st is always original person
+
+            // Logic logic for prompts
+            if (selectedClothing === 'custom') {
+                clothingPrompt = `Change the person's outfit to match the clothing style and details shown in the ${ordinal(imageIndex)} image provided exactly.`;
+                imageIndex++;
+            } else if (selectedClothing !== 'original') {
+                clothingPrompt = `Change the clothing to ${selectedClothing}.`;
+            } else {
+                clothingPrompt = "Keep the clothing from the original image.";
+            }
+
+            if (selectedHair === 'custom') {
+                hairPrompt = `Change the person's hairstyle to match the style shown in the ${ordinal(imageIndex)} image provided.`;
+                imageIndex++;
+            } else {
+                hairPrompt = "Keep the hairstyle from the original image.";
+            }
+
+            const basePrompt = `Create a standard 3:4 ratio ID photo. The person from the first image must be looking directly at the camera with a neutral, serious expression. The cropping should be standard for an ID photo (head and shoulders). ${clothingPrompt} ${hairPrompt} Maintain the original person's facial features and identity exactly.`;
+
+            // Helper to build payload
+            const buildPayload = (bgColorPrompt) => {
+                const parts = [
+                    { text: `${basePrompt} ${bgColorPrompt}` },
+                    { inlineData: { mimeType: "image/jpeg", data: originalImageBase64 } } // 1st image
+                ];
+                
+                if (selectedClothing === 'custom') {
+                    parts.push({ inlineData: { mimeType: "image/jpeg", data: clothingImageBase64 } });
+                }
+
+                if (selectedHair === 'custom') {
+                    parts.push({ inlineData: { mimeType: "image/jpeg", data: hairImageBase64 } });
+                }
+                
+                return {
+                    contents: [{ parts: parts }],
+                    generationConfig: { 
+                        responseModalities: ['IMAGE'],
+                        imageConfig: { aspectRatio: "3:4" }
+                    }
+                };
+            };
+
+            const promptWhiteBg = `The background must be solid white (#FFFFFF).`;
+            const promptBlueBg = `The background must be solid royal blue (#4169E1).`;
+
+            try {
+                const [whiteBgResult, blueBgResult] = await Promise.all([
+                    callGenerativeApiWithPayload(buildPayload(promptWhiteBg)),
+                    callGenerativeApiWithPayload(buildPayload(promptBlueBg))
+                ]);
+
+                const whiteBgData = extractImageData(whiteBgResult);
+                const blueBgData = extractImageData(blueBgResult);
+                
+                if (!whiteBgData || !blueBgData) {
+                    throw new Error("Không thể tạo ảnh. Vui lòng thử lại với ảnh khác rõ nét hơn.");
+                }
+
+                displayResults(whiteBgData, blueBgData);
+
+            } catch (error) {
+                console.error("API Error:", error);
+                showError(error.message || "Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.");
+            } finally {
+                setLoading(false);
+            }
+        }
+        
+        function ordinal(i) {
+            var j = i % 10,
+                k = i % 100;
+            if (j == 1 && k != 11) {
+                return i + "st";
+            }
+            if (j == 2 && k != 12) {
+                return i + "nd";
+            }
+            if (j == 3 && k != 13) {
+                return i + "rd";
+            }
+            return i + "th";
+        }
+        
+        async function callGenerativeApiWithPayload(payload, retries = 3, delay = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errorBody = await response.json();
+                        console.error("API HTTP Error:", response.status, errorBody);
+                        throw new Error(`API trả về lỗi ${response.status}.`);
+                    }
+                    
+                    return await response.json();
+
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    await new Promise(res => setTimeout(res, delay * Math.pow(2, i)));
+                }
+            }
+        }
+
+        function extractImageData(result) {
+            return result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+        }
+
+        // --- UI Update Functions ---
+        
+        function setLoading(isLoading) {
+            if (isLoading) {
+                loadingArea.classList.remove('hidden');
+                placeholderArea.classList.add('hidden');
+                resultsArea.classList.add('hidden');
+                generateButton.disabled = true;
+                generateButton.textContent = 'Đang xử lý...';
+            } else {
+                loadingArea.classList.add('hidden');
+                generateButton.disabled = false;
+                generateButton.textContent = 'Tạo ảnh thẻ';
+            }
+        }
+        
+        function displayResults(whiteBgData, blueBgData) {
+            const whiteUrl = `data:image/png;base64,${whiteBgData}`;
+            const blueUrl = `data:image/png;base64,${blueBgData}`;
+
+            resultWhiteImg.src = whiteUrl;
+            resultBlueImg.src = blueUrl;
+
+            downloadWhiteLink.href = whiteUrl;
+            downloadBlueLink.href = blueUrl;
+
+            resultsArea.classList.remove('hidden');
+            placeholderArea.classList.add('hidden');
+            loadingArea.classList.add('hidden');
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorArea.classList.remove('hidden');
+        }
+
+        function hideError() {
+            errorArea.classList.add('hidden');
+        }
+
+        // Initialize button state
+        generateButton.disabled = true;
+    </script>
+</body>
+</html>
